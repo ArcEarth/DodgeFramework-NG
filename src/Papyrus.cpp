@@ -17,11 +17,4 @@ namespace Papyrus
 		logger::info("Registered DodgeFramework_MCM class");
 		return true;
 	}
-
-	void Register()
-	{
-		auto papyrus = SKSE::GetPapyrusInterface();
-		papyrus->Register(DodgeFramework_MCM::Register);
-		logger::info("Registered papyrus functions");
-	}
 }
