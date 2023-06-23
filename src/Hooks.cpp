@@ -18,16 +18,25 @@ namespace Hooks
 
 	void SprintHandlerHook::ProcessButton(RE::SprintHandler* a_this, RE::ButtonEvent* a_event, RE::PlayerControlsData* a_data)
 	{
-		using FlagBDD = RE::PlayerCharacter::FlagBDD;
-
 		if (Settings::bUseSprintButton && !REL::Module::IsVR()) {
 			auto playerCharacter = RE::PlayerCharacter::GetSingleton();
 
 			if (playerCharacter) {
                 // unkBDD is the sprint control bit
                 // Only aviable in AE/SE, but not in VR yet
-                auto& unkBDD = REL::RelocateMember<RE::stl::enumeration<FlagBDD, std::uint8_t>>(playerCharacter, 0xBDD, 0x0);
-                auto playerSprinting = [&]() { return (unkBDD & FlagBDD::kSprinting) != FlagBDD::kNone; };
+                // auto& unkBDD = REL::RelocateMember<RE::stl::enumeration<FlagBDD, std::uint8_t>>(playerCharacter, 0xBDD, 0x0);
+                auto playerSprinting = [&]() { 
+					// return (unkBDD & FlagBDD::kSprinting) != FlagBDD::kNone; 
+					if (REL::Module::IsVR())
+					{
+                        return playerCharacter->AsActorState()->IsSprinting();
+					} else {
+						// This offset is defined for AE/SE, but not for VR
+						// Check this offset around GetPlayerRuntimeData()
+                        static constexpr std::ptrdiff_t PlayerFlagsOffset = 0xBD8 - 0x3D8;
+                        return REL::RelocateMember<RE::PlayerCharacter::PlayerFlags>(&playerCharacter->GetPlayerRuntimeData(), PlayerFlagsOffset).isSprinting;
+                    }
+				};
 
 				if (a_event->IsDown() && playerSprinting()) {  // stopping sprint
 					bStoppingSprint = true;

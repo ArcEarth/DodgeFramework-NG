@@ -95,7 +95,10 @@ namespace Events
 		auto controlMap = RE::ControlMap::GetSingleton();
 
 		if (ui->GameIsPaused() || !controlMap->IsMovementControlsEnabled() || !controlMap->IsLookingControlsEnabled() || ui->IsMenuOpen("Dialogue Menu") 
-			|| playerCharacter->GetSitSleepState() != RE::SIT_SLEEP_STATE::kNormal || playerCharacter->GetActorValue(RE::ActorValue::kStamina) <= 0) {
+			||
+            playerCharacter->AsActorState()->GetSitSleepState() != RE::SIT_SLEEP_STATE::kNormal ||
+            (	!playerCharacter->IsGodMode() &&
+				playerCharacter->AsActorValueOwner()->GetActorValue(RE::ActorValue::kStamina) <= 0)) {
 			return;
 		}
 		
